@@ -1,12 +1,21 @@
 import { useState } from "react";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { toast } from "sonner";
-import { Check, Send } from "lucide-react";
+import { Check, Send, ChevronDown } from "lucide-react";
 
 export default function RSVPForm() {
   const sectionRef = useScrollReveal<HTMLElement>(true);
   const [form, setForm] = useState({ name: "", email: "", guests: "1", attendance: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
+  const [openAttendance, setOpenAttendance] = useState(false);
+  const [openGuests, setOpenGuests] = useState(false);
+
+  const attendanceOptions = [
+    { value: "yes", label: "Joyfully Accept" },
+    { value: "no", label: "Regretfully Decline" }
+  ];
+
+  const guestOptions = [1, 2, 3, 4];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,27 +79,79 @@ export default function RSVPForm() {
           <div className="grid sm:grid-cols-2 gap-5">
             <div>
               <label className="block text-sm font-body font-medium text-foreground mb-2">Will you attend? *</label>
-              <select
-                value={form.attendance}
-                onChange={(e) => setForm({ ...form, attendance: e.target.value })}
-                className="w-full px-4 py-3 rounded-lg bg-background border border-border focus:border-primary focus:ring-1 focus:ring-primary/30 outline-none transition-all font-body text-sm text-foreground"
-              >
-                <option value="">Select</option>
-                <option value="yes">Joyfully Accept</option>
-                <option value="no">Regretfully Decline</option>
-              </select>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOpenAttendance(!openAttendance);
+                    setOpenGuests(false);
+                  }}
+                  className="w-full px-4 py-3 rounded-lg bg-background border border-border focus:border-primary focus:ring-1 focus:ring-primary/30 outline-none transition-all font-body text-sm text-foreground text-left flex items-center justify-between hover:border-primary/50"
+                >
+                  <span className={form.attendance ? "text-foreground" : "text-muted-foreground"}>
+                    {form.attendance ? attendanceOptions.find(o => o.value === form.attendance)?.label : "Select"}
+                  </span>
+                  <ChevronDown className={`w-4 h-4 text-primary transition-transform ${openAttendance ? "rotate-180" : ""}`} />
+                </button>
+                {openAttendance && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-background border border-border rounded-lg shadow-lg z-20 overflow-hidden animate-in fade-in slide-in-from-top-2">
+                    {attendanceOptions.map((option) => (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => {
+                          setForm({ ...form, attendance: option.value });
+                          setOpenAttendance(false);
+                        }}
+                        className={`w-full px-4 py-3 text-left font-body text-sm transition-colors ${
+                          form.attendance === option.value
+                            ? "bg-primary/20 text-primary"
+                            : "text-foreground hover:bg-primary/10"
+                        }`}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
             <div>
               <label className="block text-sm font-body font-medium text-foreground mb-2">Number of Guests</label>
-              <select
-                value={form.guests}
-                onChange={(e) => setForm({ ...form, guests: e.target.value })}
-                className="w-full px-4 py-3 rounded-lg bg-background border border-border focus:border-primary focus:ring-1 focus:ring-primary/30 outline-none transition-all font-body text-sm text-foreground"
-              >
-                {[1, 2, 3, 4].map((n) => (
-                  <option key={n} value={n}>{n}</option>
-                ))}
-              </select>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOpenGuests(!openGuests);
+                    setOpenAttendance(false);
+                  }}
+                  className="w-full px-4 py-3 rounded-lg bg-background border border-border focus:border-primary focus:ring-1 focus:ring-primary/30 outline-none transition-all font-body text-sm text-foreground text-left flex items-center justify-between hover:border-primary/50"
+                >
+                  <span>{form.guests}</span>
+                  <ChevronDown className={`w-4 h-4 text-primary transition-transform ${openGuests ? "rotate-180" : ""}`} />
+                </button>
+                {openGuests && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-background border border-border rounded-lg shadow-lg z-20 overflow-hidden animate-in fade-in slide-in-from-top-2">
+                    {guestOptions.map((num) => (
+                      <button
+                        key={num}
+                        type="button"
+                        onClick={() => {
+                          setForm({ ...form, guests: num.toString() });
+                          setOpenGuests(false);
+                        }}
+                        className={`w-full px-4 py-3 text-left font-body text-sm transition-colors ${
+                          form.guests === num.toString()
+                            ? "bg-primary/20 text-primary"
+                            : "text-foreground hover:bg-primary/10"
+                        }`}
+                      >
+                        {num}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
